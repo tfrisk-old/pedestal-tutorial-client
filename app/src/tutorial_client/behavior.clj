@@ -6,14 +6,19 @@
 (defn inc-transform [old-value _]
   ((fnil inc 0) old-value))
 
+(defn swap-transform [_ message]
+  (:value message))
+
 ;send transform-enable at application startup
 (defn init-main [_]
   [[:transform-enable [:main :my-counter] :inc [{msg/topic [:my-counter]}]]])
 
 (def example-app
   {:version 2
-   :transform [[:inc [:my-counter] inc-transform]]
+   :transform [
+     [:inc  [:my-counter] inc-transform]
+     [:swap [:**]         swap-transform]]
    :emit [
      {:init init-main}
-     [#{[:*]} (app/default-emitter [:main])]]})
+     [#{[:my-counter] [:other-counters :*]} (app/default-emitter [:main])]]})
 
