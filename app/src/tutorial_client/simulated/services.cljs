@@ -3,6 +3,9 @@
             [io.pedestal.app.messages :as msg]
 	    [io.pedestal.app.util.platform :as platform]))
 
+(defn services-fn [message input-queue]
+  (.log js/console (str "Sending message to server: " message)))
+
 (def counters (atom {"abc" 0 "xyz" 0}))
 
 (defn increment-counter [key t input-queue]
