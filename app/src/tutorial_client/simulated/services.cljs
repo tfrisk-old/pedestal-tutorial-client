@@ -11,7 +11,7 @@
 	    :value (get (swap! counters update-in [key] inc) key)})
   (platform/create-timeout t #(increment-counter key t input-queue)))
 
-(defn receive-message [input-queue]
+(defn receive-messages [input-queue]
   (increment-counter "abc" 2000 input-queue)
   (increment-counter "xyz" 5000 input-queue))
 
