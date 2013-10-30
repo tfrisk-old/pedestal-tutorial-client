@@ -9,6 +9,10 @@
 (defn swap-transform [_ message]
   (:value message))
 
+;derive function
+(defn total-count [_ nums]
+  (apply + nums))
+
 ;effect function
 (defn publish-counter [count]
   [{msg/type :swap msg/topic [:other-counters] :value count}])
@@ -23,7 +27,13 @@
      [:inc  [:my-counter] inc-transform]
      [:swap [:**]         swap-transform]]
    :effect #{[#{[:my-counter]} publish-counter :single-val]}
+   :derive #{[
+     #{[:my-counter] [:other-counters :*]} ;inputs
+     [:total-count] ;output
+     total-count ;derive function
+     :vals]} ;input specifier
    :emit [
      {:init init-main}
-     [#{[:my-counter] [:other-counters :*]} (app/default-emitter [:main])]]})
+     [#{[:my-counter] [:other-counters :*] [:total-count]}
+       (app/default-emitter [:main])]]})
 
