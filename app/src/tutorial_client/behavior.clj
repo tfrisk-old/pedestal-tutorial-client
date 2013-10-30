@@ -9,9 +9,15 @@
 (defn swap-transform [_ message]
   (:value message))
 
-;derive function
+;derive functions
 (defn total-count [_ nums]
   (apply + nums))
+
+(defn maximum [old-value nums]
+  (apply max (or old-value 0) nums))
+
+(defn average-count [_ {:keys [total nums]}] ;take input in a map
+  (/ total (count nums)))
 
 ;effect function
 (defn publish-counter [count]
@@ -27,13 +33,20 @@
      [:inc  [:my-counter] inc-transform]
      [:swap [:**]         swap-transform]]
    :effect #{[#{[:my-counter]} publish-counter :single-val]}
-   :derive #{[
-     #{[:my-counter] [:other-counters :*]} ;inputs
-     [:total-count] ;output
-     total-count ;derive function
-     :vals]} ;input specifier
+   :derive #{
+     [#{[:my-counter] [:other-counters :*]} [:total-count] total-count :vals]
+     [#{[:my-counter] [:other-counters :*]} [:max-count] maximum :vals]
+     [{[:my-counter] :nums ;supply the arguments in a map
+       [:other-counters :*] :nums
+       [:total-count] :total}
+      [:average-count] average-count :map] ;input specifier set to map
+     }
    :emit [
      {:init init-main}
-     [#{[:my-counter] [:other-counters :*] [:total-count]}
+     [#{[:my-counter]
+        [:other-counters :*]
+	[:total-count]
+	[:max-count]
+	[:average-count]}
        (app/default-emitter [:main])]]})
 
